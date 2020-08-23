@@ -3,33 +3,51 @@ import csv
 
 csvpath = os.path.join("..", "PyPoll", "Resources", "election_data.csv")
 
+votesByCandidate = {}
+
 with open(csvpath, encoding='utf-8') as csvfile:
     csvreader = csv.reader(csvfile, delimiter=',')
     csvheader = next(csvreader)
-    # return total number of months and sum of profit/loss
-    numOfVotes = 0
 
+    # add candidates and his/her votes in a dictionary
     for row in csvreader:
-        numOfVotes = numOfVotes + 1
+        candidate = row[2]
+        if candidate in votesByCandidate:
+            votesByCandidate[candidate] = votesByCandidate[candidate] + 1
+        else:
+            votesByCandidate[candidate] = 1
+
+    # calculate the total votes by looking up the dictionary
+    sumOfVotes = 0
+    for key in votesByCandidate:
+        sumOfVotes = sumOfVotes + votesByCandidate[key]
 
 print("Election Results")
 print("------------------------")
-print(f"Total Votes: {numOfVotes}")
+print(f"Total Votes: {sumOfVotes}")
 print("------------------------")
-#print(f"Total: ${round(sumOfPnL)}")
-#print(f"Average  Change: ${avgChange}")
-#print(f"Greatest Increase in Profits: {max_date} (${round(max_value)})")
-#print(f"Greatest Decrease in Profits: {min_date} (${round(min_value)})")
+# calculate and print the % of votes for each candidate
+for key in votesByCandidate:
+    votePct = "{:.3f}".format(votesByCandidate[key]/sumOfVotes*100)
+    print(f"{key}: {votePct}% ({votesByCandidate[key]})")
 print("------------------------")
+# find the max value in the dict and return the key
+max_value = max(votesByCandidate.values())
+max_keys = [key for key, value in votesByCandidate.items() if value == max_value]
+print(f"Winner: {max_keys[0]}")
 print("------------------------")
-#output_text_path = os.path.join("..", "PyBank", "analysis", "financial_analysis_output.txt")
 
-# with open(output_text_path, "w") as outputfile:
-    #outputfile.writelines("Financial Analysis\n")
-    #outputfile.writelines("------------------------\n")
-    #outputfile.writelines(f"Total Month: {numOfMonth}\n")
-    #outputfile.writelines(f"Total: ${round(sumOfPnL)}\n")
-    #outputfile.writelines(f"Average  Change: ${avgChange}\n")
-    #outputfile.writelines(f"Greatest Increase in Profits: {max_date} (${round(max_value)})\n")
-    #outputfile.writelines(f"Greatest Decrease in Profits: {min_date} (${round(min_value)})\n")
+# export the results to a text file
+output_text_path = os.path.join("..", "PyPoll", "analysis", "election_output.txt")
 
+with open(output_text_path, "w") as outputfile:
+    outputfile.writelines("Election Results\n")
+    outputfile.writelines("------------------------\n")
+    outputfile.writelines(f"Total Votes: {sumOfVotes}\n")
+    outputfile.writelines("------------------------\n")
+    for key in votesByCandidate:
+        votePct = "{:.3f}".format(votesByCandidate[key]/sumOfVotes*100)
+        outputfile.writelines(f"{key}: {votePct}% ({votesByCandidate[key]})\n")
+    outputfile.writelines("------------------------\n")
+    outputfile.writelines(f"Winner: {max_keys[0]}\n")
+    outputfile.writelines("------------------------\n")
